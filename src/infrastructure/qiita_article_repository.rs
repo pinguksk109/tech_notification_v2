@@ -34,8 +34,7 @@ impl ArticlePort for QiitaArticleRepository {
             return Err(format!("Qiita API error{}", status.as_u16()).into());
         }
 
-        let mut items: Vec<Item> = resp.json().await?;
-        items.retain(|item| item.likes_count >= 3);
+        let items: Vec<Item> = resp.json().await?;
 
         Ok(items)
     }
