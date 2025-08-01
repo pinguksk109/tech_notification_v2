@@ -1,0 +1,1 @@
+pub mod qiita_article_repository;
