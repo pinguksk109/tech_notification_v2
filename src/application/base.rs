@@ -12,5 +12,3 @@ where
     fn new(input: I) -> Self;
     async fn handle(&self) -> Result<O>;
 }
-
-#[derive(Debug)]
