@@ -27,6 +27,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "anyhow"
+version = "1.0.100"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a23eb6b1614318a8071c9b2521f36b424b2c83db5eb3a0fead4a6c0809af6e61"
+
+[[package]]
 name = "async-stream"
 version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1259,6 +1265,7 @@ dependencies = [
 name = "tech_notification_v2"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "async-trait",
  "lambda_runtime",
  "log",
@@ -1266,6 +1273,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tokio",
+ "trait-variant",
 ]
 
 [[package]]
@@ -1477,6 +1485,17 @@ dependencies = [
  "tracing",
  "tracing-core",
  "tracing-serde",
+]
+
+[[package]]
+name = "trait-variant"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "70977707304198400eb4835a78f6a9f928bf41bba420deb8fdb175cd965d77a7"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
