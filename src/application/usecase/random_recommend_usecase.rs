@@ -1,9 +1,8 @@
 use anyhow::Result;
-use async_trait::async_trait;
 use rand::seq::SliceRandom;
 
 use crate::application::{
-    base::{OutputTrait, UsecaseTrait},
+    base::{InputTrait, OutputTrait, UsecaseTrait},
     domain::model::item::Item,
     port::article_port::ArticlePort,
 };
@@ -11,6 +10,8 @@ use crate::infrastructure::{
     qiita_article_repository::QiitaArticleRepository,
     zenn_article_repository::ZennArticleRepository,
 };
+
+impl InputTrait for () {}
 
 #[derive(Debug)]
 pub struct RecommendOutput {
@@ -40,7 +41,6 @@ pub struct RandomRecommendUsecase {
     repository: Repository<QiitaArticleRepository, ZennArticleRepository>,
 }
 
-#[async_trait]
 impl UsecaseTrait<(), RecommendOutput> for RandomRecommendUsecase {
     fn new(_: ()) -> Self {
         Self {
@@ -48,14 +48,12 @@ impl UsecaseTrait<(), RecommendOutput> for RandomRecommendUsecase {
         }
     }
     async fn handle(&self) -> Result<RecommendOutput> {
-        let mut rng = rand::rng();
-
         let mut qiita_items = self.repository.qiita.fetch_items(1).await?;
-        qiita_items.shuffle(&mut rng);
+        qiita_items.shuffle(&mut rand::rng());
         let qiita_picks = qiita_items.into_iter().take(5).collect::<Vec<_>>();
 
         let mut zenn_items: Vec<Item> = self.repository.zenn.fetch_items(1).await?;
-        zenn_items.shuffle(&mut rng);
+        zenn_items.shuffle(&mut rand::rng());
         let zenn_picks = zenn_items.into_iter().take(5).collect::<Vec<_>>();
 
         Ok(RecommendOutput {
@@ -84,7 +82,7 @@ mod tests {
                 println!("--- Qiita (picked {}) ---", output.qiita.len());
                 for (i, item) in output.qiita.iter().enumerate() {
                     println!(
-                        "{}. {} [{}] ❤️{}",
+                        "{}. {} [{}] {}",
                         i + 1,
                         item.title,
                         item.url,
@@ -95,7 +93,7 @@ mod tests {
                 println!("--- Zenn (picked {}) ---", output.zenn.len());
                 for (i, item) in output.zenn.iter().enumerate() {
                     println!(
-                        "{}. {} [{}] ❤️{}",
+                        "{}. {} [{}] {}",
                         i + 1,
                         item.title,
                         item.url,
