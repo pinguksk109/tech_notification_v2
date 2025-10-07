@@ -35,12 +35,11 @@ For generic events, where you define the event data structure, you can create a 
 
 ```json
 {
-    "command": "test"
+  "command": "test"
 }
 ```
 
 Then, run `cargo lambda invoke --data-file ./data.json` to invoke the function with the data in `data.json`.
-
 
 Read more about running the local server in [the Cargo Lambda documentation for the `watch` command](https://www.cargo-lambda.info/commands/watch.html).
 Read more about invoking the function in [the Cargo Lambda documentation for the `invoke` command](https://www.cargo-lambda.info/commands/invoke.html).
@@ -50,4 +49,3 @@ Read more about invoking the function in [the Cargo Lambda documentation for the
 To deploy the project, run `cargo lambda deploy`. This will create an IAM role and a Lambda function in your AWS account.
 
 Read more about deploying your lambda function in [the Cargo Lambda documentation](https://www.cargo-lambda.info/commands/deploy.html).
-# tech_notification_v2
