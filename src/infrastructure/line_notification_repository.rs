@@ -18,7 +18,6 @@ impl LineNotificationRepository {
         let to = env::var("LINE_USER_ID").context("環境変数 LINE_USER_ID が設定されていません")?;
         let bearer_token = env::var("LINE_BEARER_TOKEN")
             .context("環境変数 LINE_BEARER_TOKEN が設定されていません")?;
-
         Ok(Self {
             to,
             bearer_token,
