@@ -1,4 +1,7 @@
-use tech_notification_v2::{application::port::article_port::ArticlePort, infrastructure::qiita_article_repository::QiitaArticleRepository};
+use tech_notification_v2::{
+    application::port::article_port::ArticlePort,
+    infrastructure::qiita_article_repository::QiitaArticleRepository,
+};
 
 #[tokio::test]
 async fn test_fetch_items_from_qiita() {

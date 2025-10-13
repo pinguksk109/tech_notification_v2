@@ -1,5 +1,5 @@
-use tech_notification_v2::infrastructure::zenn_article_repository::ZennArticleRepository;
 use tech_notification_v2::application::port::article_port::ArticlePort;
+use tech_notification_v2::infrastructure::zenn_article_repository::ZennArticleRepository;
 
 #[tokio::test]
 async fn test_fetch_items_from_zenn() {
