@@ -15,6 +15,7 @@ use crate::{
 };
 
 impl InputTrait for () {}
+impl OutputTrait for () {}
 
 #[derive(Debug)]
 pub struct RecommendOutput {
@@ -44,13 +45,13 @@ pub struct RandomRecommendUsecase {
     repository: Repository<QiitaArticleRepository, ZennArticleRepository>,
 }
 
-impl UsecaseTrait<(), RecommendOutput> for RandomRecommendUsecase {
+impl UsecaseTrait<(), ()> for RandomRecommendUsecase {
     fn new(_: ()) -> Self {
         Self {
             repository: Repository::new(),
         }
     }
-    async fn handle(&self) -> Result<RecommendOutput> {
+    async fn handle(&self) -> Result<()> {
         let mut qiita_items = self.repository.qiita.fetch_items(1).await?;
         qiita_items.shuffle(&mut rand::rng());
         let qiita_picks = qiita_items.into_iter().take(5).collect::<Vec<_>>();
@@ -74,7 +75,7 @@ impl UsecaseTrait<(), RecommendOutput> for RandomRecommendUsecase {
 
         let zenn_msg = {
             let mut s = String::from("Zenn 今日のランダムチョイス\n");
-            for (i, it) in qiita_picks.iter().enumerate() {
+            for (i, it) in zenn_picks.iter().enumerate() {
                 let _ = std::fmt::Write::write_fmt(
                     &mut s,
                     format_args!("{}. {} {} ❤️{}\n", i + 1, it.title, it.url, it.likes_count),
@@ -86,10 +87,7 @@ impl UsecaseTrait<(), RecommendOutput> for RandomRecommendUsecase {
         notifier.send(&qiita_msg).await?;
         notifier.send(&zenn_msg).await?;
 
-        Ok(RecommendOutput {
-            qiita: qiita_picks,
-            zenn: zenn_picks,
-        })
+        Ok(())
     }
 }
 
