@@ -1,14 +1,17 @@
 use anyhow::Result;
 use rand::seq::SliceRandom;
 
-use crate::application::{
-    base::{InputTrait, OutputTrait, UsecaseTrait},
-    domain::model::item::Item,
-    port::article_port::ArticlePort,
-};
 use crate::infrastructure::{
     qiita_article_repository::QiitaArticleRepository,
     zenn_article_repository::ZennArticleRepository,
+};
+use crate::{
+    application::{
+        base::{InputTrait, OutputTrait, UsecaseTrait},
+        domain::model::item::Item,
+        port::{article_port::ArticlePort, notification_port::NotificationPort},
+    },
+    infrastructure::line_notification_repository::LineNotificationRepository,
 };
 
 impl InputTrait for () {}
@@ -55,6 +58,33 @@ impl UsecaseTrait<(), RecommendOutput> for RandomRecommendUsecase {
         let mut zenn_items: Vec<Item> = self.repository.zenn.fetch_items(1).await?;
         zenn_items.shuffle(&mut rand::rng());
         let zenn_picks = zenn_items.into_iter().take(5).collect::<Vec<_>>();
+
+        let notifier = LineNotificationRepository::new()?;
+
+        let qiita_msg = {
+            let mut s = String::from("Qiita 今日のランダムチョイス\n");
+            for (i, it) in qiita_picks.iter().enumerate() {
+                let _ = std::fmt::Write::write_fmt(
+                    &mut s,
+                    format_args!("{}. {} {} ❤️{}\n", i + 1, it.title, it.url, it.likes_count),
+                );
+            }
+            s
+        };
+
+        let zenn_msg = {
+            let mut s = String::from("Zenn 今日のランダムチョイス\n");
+            for (i, it) in qiita_picks.iter().enumerate() {
+                let _ = std::fmt::Write::write_fmt(
+                    &mut s,
+                    format_args!("{}. {} {} ❤️{}\n", i + 1, it.title, it.url, it.likes_count),
+                );
+            }
+            s
+        };
+
+        notifier.send(&qiita_msg).await?;
+        notifier.send(&zenn_msg).await?;
 
         Ok(RecommendOutput {
             qiita: qiita_picks,
