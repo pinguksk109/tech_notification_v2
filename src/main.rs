@@ -1,4 +1,3 @@
-use anyhow::Ok;
 use lambda_runtime::{Error, LambdaEvent, run, service_fn};
 use serde_json::{Value, json};
 use tech_notification_v2::application::base::UsecaseTrait;

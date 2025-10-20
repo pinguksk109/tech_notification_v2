@@ -67,7 +67,7 @@ impl UsecaseTrait<(), ()> for RandomRecommendUsecase {
             for (i, it) in qiita_picks.iter().enumerate() {
                 let _ = std::fmt::Write::write_fmt(
                     &mut s,
-                    format_args!("{}. {} {} ❤️{}\n", i + 1, it.title, it.url, it.likes_count),
+                    format_args!("{}. {} {}\n", i + 1, it.title, it.url),
                 );
             }
             s
@@ -78,7 +78,7 @@ impl UsecaseTrait<(), ()> for RandomRecommendUsecase {
             for (i, it) in zenn_picks.iter().enumerate() {
                 let _ = std::fmt::Write::write_fmt(
                     &mut s,
-                    format_args!("{}. {} {} ❤️{}\n", i + 1, it.title, it.url, it.likes_count),
+                    format_args!("{}. {} {}\n", i + 1, it.title, it.url),
                 );
             }
             s
@@ -98,41 +98,10 @@ mod tests {
 
     #[tokio::test]
     async fn should_fetch_articles_return_qiita_and_zenn_picks() {
-        // 1. setup
         let usecase = RandomRecommendUsecase::new(());
-
-        // 2. execute
-        let actual = usecase.handle().await;
-
-        // 3. assert
-        match actual {
-            Ok(output) => {
-                println!("--- Qiita (picked {}) ---", output.qiita.len());
-                for (i, item) in output.qiita.iter().enumerate() {
-                    println!(
-                        "{}. {} [{}] {}",
-                        i + 1,
-                        item.title,
-                        item.url,
-                        item.likes_count
-                    );
-                }
-
-                println!("--- Zenn (picked {}) ---", output.zenn.len());
-                for (i, item) in output.zenn.iter().enumerate() {
-                    println!(
-                        "{}. {} [{}] {}",
-                        i + 1,
-                        item.title,
-                        item.url,
-                        item.likes_count
-                    );
-                }
-            }
-            Err(e) => {
-                eprintln!("Usecase execution failed: {:?}", e);
-                panic!("failed to execute usecase");
-            }
+        if let Err(e) = usecase.handle().await {
+            eprintln!("Usecase execution failed: {e:?}");
+            panic!("failed to execute usecase");
         }
     }
 }
