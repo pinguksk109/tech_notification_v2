@@ -1,5 +1,6 @@
 use anyhow::Result;
 use rand::seq::SliceRandom;
+use std::fmt::Write;
 
 use crate::infrastructure::{
     qiita_article_repository::QiitaArticleRepository,
@@ -52,37 +53,32 @@ impl UsecaseTrait<(), ()> for RandomRecommendUsecase {
         }
     }
     async fn handle(&self) -> Result<()> {
-        let mut qiita_items = self.repository.qiita.fetch_items(1).await?;
-        qiita_items.shuffle(&mut rand::rng());
-        let qiita_picks = qiita_items.into_iter().take(5).collect::<Vec<_>>();
+        let pick_random = |mut items: Vec<Item>| {
+            items.shuffle(&mut rand::rng());
+            items.into_iter().take(5).collect::<Vec<_>>()
+        };
 
-        let mut zenn_items: Vec<Item> = self.repository.zenn.fetch_items(1).await?;
-        zenn_items.shuffle(&mut rand::rng());
-        let zenn_picks = zenn_items.into_iter().take(5).collect::<Vec<_>>();
+        let qiita_picks = pick_random(self.repository.qiita.fetch_items(1).await?);
+        let zenn_picks = pick_random(self.repository.zenn.fetch_items(1).await?);
 
         let notifier = LineNotificationRepository::new()?;
 
-        let qiita_msg = {
-            let mut s = String::from("Qiita 今日のランダムチョイス\n");
-            for (i, it) in qiita_picks.iter().enumerate() {
-                let _ = std::fmt::Write::write_fmt(
-                    &mut s,
-                    format_args!("{}. {} {}\n", i + 1, it.title, it.url),
-                );
-            }
-            s
+        let make_msg = |title: &str, picks: &[Item]| {
+            picks
+                .iter()
+                .enumerate()
+                .map(|(i, it)| format!("{}. {} {}\n", i + 1, it.title, it.url))
+                .fold(
+                    format!("{} 今日のランダムチョイス\n", title),
+                    |mut acc, line| {
+                        let _ = write!(acc, "{}", line);
+                        acc
+                    },
+                )
         };
 
-        let zenn_msg = {
-            let mut s = String::from("Zenn 今日のランダムチョイス\n");
-            for (i, it) in zenn_picks.iter().enumerate() {
-                let _ = std::fmt::Write::write_fmt(
-                    &mut s,
-                    format_args!("{}. {} {}\n", i + 1, it.title, it.url),
-                );
-            }
-            s
-        };
+        let qiita_msg = make_msg("Qiita", &qiita_picks);
+        let zenn_msg = make_msg("Zenn", &zenn_picks);
 
         notifier.send(&qiita_msg).await?;
         notifier.send(&zenn_msg).await?;
